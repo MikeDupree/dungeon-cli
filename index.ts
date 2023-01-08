@@ -1,6 +1,8 @@
 #!/usr/bin/env npx ts-node
 
-const { Readable } = require('node:stream');
+import chalk from 'chalk';
+import Player from "./src/Player";
+import config from "./config";
 var keypress = require('keypress');
 
 const { stdin } = process;
@@ -11,35 +13,36 @@ console.log('hello there');
 console.log('Terminal size: ' + process.stdout.columns + 'x' + process.stdout.rows);
 const { columns, rows } = process.stdout;
 
-// configA
-// screen configurables
-const rowEndingModifier = 3;
+const { display, custom: {symbols} } = config;
 
-// game configurables
-const refreshRate = 1000;
-const wall = "#";
-const player = "&";
-const empty = " ";
-const xp = "·";
+// Game State;
+const player = Player();
 
+// Environment Building
 const isBorderWall = (row: number, col: number) => {
-  if (row === 0 || row === rows - rowEndingModifier - 1) return true;
+  if (row === 0 || row === rows - display.padding.bottom - 1) return true;
   if (col === 0 || col === columns - 1) return true;
-}
+};
 
 const printScreen = () => {
-  for (let row = 0; row < rows - rowEndingModifier; row++) {
+  console.clear();
+  for (let row = display.padding.top; row < rows - display.padding.bottom; row++) {
     for (let col = 0; col < columns; col++) {
       if (isBorderWall(row, col)) {
-        process.stdout.write(wall);
+        process.stdout.write("\x1b[33m#\x1b[0m");
+      }
+      else if (player.collides(row, col)) {
+        process.stdout.write(`\x1b[92m${player.render()}\x1b[0m`);
       } else {
-        process.stdout.write(empty);
+        process.stdout.write(symbols.empty);
       }
     }
     process.stdout.write("\n");
   }
-}
+};
 
+// Input Controller
+//
 // TODO play around with reading this buffer.
 //const readable = Readable.from(process.stdin);
 //readable.on('data', (chunk: any) => {
@@ -48,18 +51,18 @@ const printScreen = () => {
 keypress(process.stdin);
 process.stdin.on('keypress', function(ch, key) {
   // Kill process on Ctl-C 
-  if ( key.sequence === '\x03' ) {
+  if (key.sequence === '\x03') {
     process.exit();
   }
-  console.log("here's the key object", key);
+
+  player.checkMovement(key.sequence);
 })
 
 const run = async () => {
   const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
   while (true) {
-    // console.clear();
-    // printScreen();
-    await sleep(refreshRate);
+    printScreen();
+    await sleep(display.refreshRate);
   }
 }
 run();
