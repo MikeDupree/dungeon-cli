@@ -1,4 +1,4 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env ts-node
 import { printScreen } from "./src/Display";
 import InputContoller from "./src/Input";
 import Player, { PlayerEmitter } from "./src/Player";
