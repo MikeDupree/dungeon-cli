@@ -1,44 +1,87 @@
+import { EventEmitter } from "events";
 import config from '../config';
+import { DisplayEmitter } from "./Display";
+import { CharacterInterface, Pos } from './types';
+
+const { up, down, left, right } = config.controls;
+
+export const PlayerEmitter = new EventEmitter();
+
+export interface PlayerInterface extends CharacterInterface {
+  checkInput: (key: string) => void;
+  attackCollides: (pos: Pos) => boolean;
+}
 
 // Player
 const Player = () => {
+  let renderCount = 0;
   let marker = config.custom.symbols.player;
   let speed = 1;
   let pos = {
-    x: 10,
-    y: 10
+    x: 50,
+    y: 50
   }
 
-  const render = () => {
-    return '&';
+  //Base attack
+  let baseAttackPos = { x: pos.x, y: pos.y };
+  let baseAttackAge = 0;
+
+  const render = (mode?: "attack") => {
+    if (mode === "attack") return renderAttack();
+    renderCount += 1;
+    return marker;
   }
 
-  const checkMovement = (key: string) => {
+  const renderAttack = () => {
+    return '-';
+  }
+
+  const checkInput = (key: string) => {
     switch (key) {
-      case 'w':
-        pos.x += speed;
-        break;
-      case 's':
+      case up:
         pos.x -= speed;
         break;
-      case 'a':
+      case down:
+        pos.x += speed;
+        break;
+      case left:
         pos.y -= speed;
         break;
-      case 'd':
+      case right:
         pos.y += speed;
         break;
     }
+    PlayerEmitter.emit("move", pos);
   }
 
-  const collides = (x: number, y: number) => {
+  const collides = ({ x, y }: Pos) => {
     return pos.x === x && pos.y === y;
   }
+
+  const attackCollides = ({ x, y }: Pos) => {
+    return baseAttackPos.x === x && baseAttackPos.y === y;
+  }
+
+  const baseAttack = () => {
+    if (renderCount % 5 !== 0) return;
+    baseAttackAge += 1;
+    if (baseAttackAge <= 5) {
+      baseAttackPos.y -= 1;
+    } else {
+      baseAttackPos.x = pos.x;
+      baseAttackPos.y = pos.y;
+      baseAttackAge = 0;
+    }
+  }
+
+  DisplayEmitter.addListener('render', baseAttack);
 
   return {
     pos,
     render,
-    checkMovement,
-    collides
+    checkInput,
+    collides,
+    attackCollides
   }
 }
 
