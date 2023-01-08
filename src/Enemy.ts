@@ -8,20 +8,55 @@ import { randomUUID } from "crypto";
 
 export interface EnemyInterface extends Omit<CharacterInterface, "collides"> {
   id: any,
-  move: (playerPos: Pos) => void;
+  move: (enemies: EnemyInterface[]) => void;
   collides: (pos: Pos, dmg?: number) => boolean;
 }
 
+
+const getRandomPos = (playerPos: Pos) => {
+  const getRandomInt = (max: number) => {
+    return Math.ceil(Math.random() * (max - 5) + 5);
+  }
+  const { stdout } = process;
+  const { columns, rows } = stdout;
+  let x = 0;
+  let y = 0;
+  let maxAttempts = 50;
+  let attempt = 0;
+
+  while (x === 0 && y === 0) {
+    attempt++;
+    let rx = getRandomInt(rows);
+    let ry = getRandomInt(columns);
+
+    if (rx > playerPos.x + 15 && rx < playerPos.x - 15) {
+      x = rx;
+    }
+    if (ry > playerPos.y + 15 && ry < playerPos.y - 15) {
+      y = ry;
+    }
+
+    if (attempt >= maxAttempts){
+      return {
+        x: rx,
+        y: ry
+      }
+    }
+  }
+
+  return {
+    x,
+    y
+  }
+}
+
 // Enemy
-const Enemy = () => {
+const Enemy = (currentPlayerPos: Pos) => {
   let id = randomUUID();
   let renderCount = 0;
-  let playerPos = { x: 0, y: 0 };
+  let playerPos = currentPlayerPos;
   let marker = config.custom.symbols.enemy;
-  let pos = {
-    x: 30,
-    y: 30
-  }
+  let pos = getRandomPos(playerPos);
   let speed = 5;
   let health = 2;
 
@@ -29,7 +64,7 @@ const Enemy = () => {
     return marker;
   }
 
-  const move = () => {
+  const move = (enemies: EnemyInterface[]) => {
     renderCount++;
     if (renderCount % speed !== 0) return;
 
@@ -63,7 +98,7 @@ const Enemy = () => {
   }
 
   // Event Subscribers
-  DisplayEmitter.addListener('render', move);
+  DisplayEmitter.addListener('render', ({enemies}) => move(enemies));
   PlayerEmitter.addListener('move', (p: Pos) => playerPos = p);
 
   return {

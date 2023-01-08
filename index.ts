@@ -1,23 +1,18 @@
 #!/usr/bin/env ts-node
 import { printScreen } from "./src/Display";
 import InputContoller from "./src/Input";
-import Player, { PlayerEmitter } from "./src/Player";
+import Player from "./src/Player";
 import config from "./config";
-import Enemy, { EnemyInterface } from "./src/Enemy";
-import { SpawnEmitter } from "./src/SpawnController";
-var keypress = require('keypress');
+import { EnemyInterface } from "./src/Enemy";
+import { createEnemySpawn, SpawnEmitter } from "./src/SpawnController";
 
-
-const { display, custom: { symbols } } = config;
+const { display } = config;
 
 // Game State;
 const player = Player();
-let enemies = [
-  Enemy(),
-]
+let enemies = createEnemySpawn();
 
 SpawnEmitter.addListener('death', (id: any) => {
-  console.log("DEATH");
   enemies = enemies.filter((e: EnemyInterface) => e.id !== id)
 });
 
@@ -28,6 +23,15 @@ const run = async () => {
   while (!config.debug) {
     printScreen({ player, enemies });
     await sleep(display.refreshRate);
+  }
+
+  if(config.debug){
+    console.log({
+      player,
+    });
+    for(const e of enemies){
+      console.log(e.id, {x: e.pos.x, y: e.pos.y});
+    }
   }
 }
 run();

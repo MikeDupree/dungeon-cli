@@ -1,6 +1,10 @@
 
 const config = {
   debug: false,
+  playerStartPos: {
+    x: 50,
+    y: 50
+  },
   controls: {
     up: 'e',
     down: 'd',
@@ -20,9 +24,9 @@ const config = {
     refreshRate: 50,
     padding: {
       top: 0,
-      bottom: 1,
-      left: 3,
-      right: 3,
+      bottom: 2,
+      left: 0,
+      right: 0,
     }
   }
 };

@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import config from '../config';
 import { DisplayEmitter } from "./Display";
+import { isBorderWall } from "./Environment";
 import { CharacterInterface, Pos } from './types';
 
 const { up, down, left, right } = config.controls;
@@ -39,15 +40,19 @@ const Player = () => {
   const checkInput = (key: string) => {
     switch (key) {
       case up:
+        if (isBorderWall(pos.x - 1, pos.y)) return;
         pos.x -= speed;
         break;
       case down:
+        if (isBorderWall(pos.x + 1, pos.y)) return;
         pos.x += speed;
         break;
       case left:
+        if (isBorderWall(pos.x, pos.y - 1)) return;
         pos.y -= speed;
         break;
       case right:
+        if (isBorderWall(pos.x, pos.y + 1)) return;
         pos.y += speed;
         break;
     }
