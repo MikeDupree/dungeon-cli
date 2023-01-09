@@ -32,10 +32,10 @@ export const printScreen = ({ player, enemies }: PrintScreen) => {
     for (let col = display.padding.left; col < columns - display.padding.right; col++) {
       const renderPos = { x: row, y: col };
 
-     if(isInterface(row)){
-        screen += `\x1b[33m${getInterfaceCharacter(col)}\x1b[0m`;
-     }
-     else if (isBorderWall(row, col)) {
+      if (isInterface(row)) {
+        screen += `\x1b[33m${getInterfaceCharacter(col, { enemies, player })}\x1b[0m`;
+      }
+      else if (isBorderWall(row, col)) {
         screen += "\x1b[33m#\x1b[0m";
       }
       else if (player.collides(renderPos)) {
