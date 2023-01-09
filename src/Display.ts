@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import config from '../config';
 import { EnemyInterface } from './Enemy';
 import { isBorderWall } from "./Environment";
+import { ExperienceOrb } from "./ExperienceOrbs";
 import { getInterfaceCharacter, isInterface } from "./Interface";
 import { PlayerInterface } from './Player';
 
@@ -13,6 +14,7 @@ const { columns, rows } = stdout;
 export const DisplayEmitter = new EventEmitter();
 
 const flush = () => {
+  if(config.debug) return;
   // Clear buffer history before rerender
   stdout.write("\u001b[3J\u001b[2J\u001b[1J");
   // Faster buffer clear. (vs using console.clear)
@@ -23,9 +25,10 @@ const flush = () => {
 interface PrintScreen {
   player: PlayerInterface;
   enemies: EnemyInterface[];
+  experienceOrbs: ExperienceOrb[];
 }
 
-export const printScreen = ({ player, enemies }: PrintScreen) => {
+export const printScreen = ({ player, enemies, experienceOrbs }: PrintScreen) => {
   flush();
   let screen = '';
   for (let row = display.padding.top; row < rows - display.padding.bottom; row++) {
@@ -33,13 +36,13 @@ export const printScreen = ({ player, enemies }: PrintScreen) => {
       const renderPos = { x: row, y: col };
 
       if (isInterface(row)) {
-        screen += `\x1b[33m${getInterfaceCharacter(col, { enemies, player })}\x1b[0m`;
+        screen += `${getInterfaceCharacter(col, { enemies, player })}`;
       }
       else if (isBorderWall(row, col)) {
         screen += "\x1b[33m#\x1b[0m";
       }
       else if (player.collides(renderPos)) {
-        screen += `\x1b[92m${player.render()}\x1b[0m`;
+        screen += player.render();
       }
       else if (player.attackCollides(renderPos)) {
         const collided = enemies.filter((e) => e.collides(renderPos, 1));
@@ -50,16 +53,25 @@ export const printScreen = ({ player, enemies }: PrintScreen) => {
         const enemyLoc = enemies.filter((e) => e.collides(renderPos));
         if (enemyLoc.length) {
           screen += `\x1b[31m${enemies[0].render()}\x1b[0m`;
-        } else {
-          screen += symbols.empty;
+        }
+        else {
+          const xp = experienceOrbs.filter((e) => e.collides(renderPos));
+          if (xp.length) {
+            screen += xp[0].render();
+          }
+          else {
+            screen += symbols.empty;
+          }
         }
       }
     }
     screen += "\n";
   }
 
-  stdout.write(screen);
-
   DisplayEmitter.emit('render', { enemies });
+
+  if (config.debug) return
+
+  stdout.write(screen);
 };
 

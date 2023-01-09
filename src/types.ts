@@ -4,8 +4,15 @@ export interface Pos {
   y: number;
 }
 
-export interface CharacterInterface {
-  pos: Pos;
+export interface CharacterInterface extends Collidable {
   render: (mode?: "attack") => string;
+}
+
+export interface Renderable {
+  render: () => string;
+}
+
+export interface Collidable {
+  pos: Pos;
   collides: (pos: Pos) => boolean;
 }

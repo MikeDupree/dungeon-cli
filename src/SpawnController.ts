@@ -4,7 +4,7 @@ import Enemy, { EnemyInterface } from "./Enemy";
 import { PlayerEmitter } from "./Player";
 import { Pos } from "./types";
 
-const enemyLimit = 2;
+const enemyLimit = 4;
 const totalEnemies = 0;
 let playerPos = config.playerStartPos;
 

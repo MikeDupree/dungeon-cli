@@ -10,6 +10,7 @@ export interface EnemyInterface extends Omit<CharacterInterface, "collides"> {
   id: any,
   move: (enemies: EnemyInterface[]) => void;
   collides: (pos: Pos, dmg?: number) => boolean;
+  rewardXP: number;
 }
 
 
@@ -59,6 +60,7 @@ const Enemy = (currentPlayerPos: Pos) => {
   let pos = getRandomPos(playerPos);
   let speed = 5;
   let health = 2;
+  let rewardXP = 1;
 
   const render = () => {
     return marker;
@@ -93,7 +95,7 @@ const Enemy = (currentPlayerPos: Pos) => {
   const receiveDmg = (dmg: number = 1) => {
     health -= dmg;
     if (health <= 0) {
-      SpawnEmitter.emit('death', id);
+      SpawnEmitter.emit('death', {id, pos, rewardXP});
     }
   }
 
@@ -106,7 +108,8 @@ const Enemy = (currentPlayerPos: Pos) => {
     pos,
     render,
     move,
-    collides
+    collides,
+    rewardXP,
   }
 }
 

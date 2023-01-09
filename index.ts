@@ -5,33 +5,33 @@ import Player from "./src/Player";
 import config from "./config";
 import { EnemyInterface } from "./src/Enemy";
 import { createEnemySpawn, SpawnEmitter } from "./src/SpawnController";
+import experienceOrb, { ExperienceOrb, ExperienceOrbEmitter } from "./src/ExperienceOrbs";
 
 const { display } = config;
 
 // Game State;
 const player = Player();
 let enemies = createEnemySpawn();
+let experienceOrbs = [];
 
-SpawnEmitter.addListener('death', (id: any) => {
+SpawnEmitter.addListener('death', ({id, pos, rewardXP}: any) => {
   enemies = enemies.filter((e: EnemyInterface) => e.id !== id)
+  experienceOrbs.push(experienceOrb(pos, rewardXP));
+});
+
+ExperienceOrbEmitter.addListener('collected', ({id}) => {
+  experienceOrbs = experienceOrbs.filter((orb: ExperienceOrb) => orb.id === id);
 });
 
 InputContoller({player})
 
 const run = async () => {
   const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
-  while (!config.debug) {
-    printScreen({ player, enemies });
+  while (true) {
+    printScreen({ player, enemies, experienceOrbs });
+    console.log('xp', player.experience);
+    console.log('orbs', experienceOrbs.length);
     await sleep(display.refreshRate);
-  }
-
-  if(config.debug){
-    console.log({
-      player,
-    });
-    for(const e of enemies){
-      console.log(e.id, {x: e.pos.x, y: e.pos.y});
-    }
   }
 }
 run();

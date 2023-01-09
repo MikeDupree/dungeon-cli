@@ -2,35 +2,47 @@ import { EventEmitter } from "events";
 import config from '../config';
 import { DisplayEmitter } from "./Display";
 import { isBorderWall } from "./Environment";
+import { ExperienceOrbEmitter } from "./ExperienceOrbs";
 import { CharacterInterface, Pos } from './types';
 
 const { up, down, left, right } = config.controls;
+const { columns, rows } = process.stdout;
 
 export const PlayerEmitter = new EventEmitter();
 
 export interface PlayerInterface extends CharacterInterface {
+  experience: number;
   checkInput: (key: string) => void;
   attackCollides: (pos: Pos) => boolean;
 }
 
 // Player
 const Player = () => {
+  let experience = 0;
+  ExperienceOrbEmitter.addListener('collected', ({reward}) => {
+    experience += reward;
+  });
   let renderCount = 0;
   let marker = config.custom.symbols.player;
   let speed = 1;
   let pos = {
-    x: 50,
-    y: 50
+    x: Math.trunc(rows / 2),
+    y: Math.trunc(columns / 2)
   }
 
   //Base attack
   let baseAttackPos = { x: pos.x, y: pos.y };
   let baseAttackAge = 0;
 
+  const debug = (title: string, data: any = '') => {
+    config.debug && console.log(title, data);
+  }
+
   const render = (mode?: "attack") => {
+    debug('player render', pos);
     if (mode === "attack") return renderAttack();
     renderCount += 1;
-    return marker;
+    return `\x1b[92m${marker}\x1b[0m`;
   }
 
   const renderAttack = () => {
@@ -38,6 +50,7 @@ const Player = () => {
   }
 
   const checkInput = (key: string) => {
+    debug('player move check');
     switch (key) {
       case up:
         if (isBorderWall(pos.x - 1, pos.y)) return;
@@ -56,6 +69,7 @@ const Player = () => {
         pos.y += speed;
         break;
     }
+    debug('player moved', pos);
     PlayerEmitter.emit("move", pos);
   }
 
@@ -82,6 +96,7 @@ const Player = () => {
   DisplayEmitter.addListener('render', baseAttack);
 
   return {
+    experience,
     pos,
     render,
     checkInput,
