@@ -20,6 +20,7 @@
                   /   -_- _ -             _- _---                       -_-  -_ \
 ```
 # Dungeon crawl CLI
+https://unicodeemoticons.com/symbols_all.htm
 
 ## Introduction
 
