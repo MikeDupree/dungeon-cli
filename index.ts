@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 import { printScreen } from "./src/Display";
 import InputContoller from "./src/Input";
-import Player from "./src/Player";
+import Player, { PlayerEmitter } from "./src/Player";
 import config from "./config";
 import { EnemyInterface } from "./src/Enemy";
 import { createEnemySpawn, SpawnEmitter } from "./src/SpawnController";
@@ -20,7 +20,7 @@ SpawnEmitter.addListener('death', ({id, pos, rewardXP}: any) => {
 });
 
 ExperienceOrbEmitter.addListener('collected', ({id}) => {
-  experienceOrbs = experienceOrbs.filter((orb: ExperienceOrb) => orb.id === id);
+  experienceOrbs = experienceOrbs.filter((orb: ExperienceOrb) => orb.id !== id);
 });
 
 InputContoller({player})
@@ -29,8 +29,6 @@ const run = async () => {
   const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
   while (true) {
     printScreen({ player, enemies, experienceOrbs });
-    console.log('xp', player.experience);
-    console.log('orbs', experienceOrbs.length);
     await sleep(display.refreshRate);
   }
 }

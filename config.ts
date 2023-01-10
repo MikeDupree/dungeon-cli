@@ -13,9 +13,9 @@ const config = {
   },
   custom: {
     symbols: {
-      player: "&",
+      player: "👨",
       enemy: "X",
-      wall: "#",
+      wall: "䷀",
       empty: " ",
       xp: "·",
     }
