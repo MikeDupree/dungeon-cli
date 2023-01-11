@@ -14,21 +14,23 @@ const player = Player();
 let enemies = createEnemySpawn();
 let experienceOrbs = [];
 
-SpawnEmitter.addListener('death', ({id, pos, rewardXP}: any) => {
+SpawnEmitter.addListener('death', ({ id, pos, rewardXP }: any) => {
   enemies = enemies.filter((e: EnemyInterface) => e.id !== id)
   experienceOrbs.push(experienceOrb(pos, rewardXP));
 });
 
-ExperienceOrbEmitter.addListener('collected', ({id}) => {
+ExperienceOrbEmitter.addListener('collected', ({ id }) => {
   experienceOrbs = experienceOrbs.filter((orb: ExperienceOrb) => orb.id !== id);
 });
 
-InputContoller({player})
+InputContoller({ player })
 
 const run = async () => {
   const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
   while (true) {
     printScreen({ player, enemies, experienceOrbs });
+    const newEnemies = createEnemySpawn();
+    enemies = [...enemies, ...newEnemies];
     await sleep(display.refreshRate);
   }
 }

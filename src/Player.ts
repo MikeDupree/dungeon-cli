@@ -19,7 +19,7 @@ export interface PlayerInterface extends CharacterInterface {
 // Player
 const Player = () => {
   let experience = 0;
-  ExperienceOrbEmitter.addListener('collected', ({reward}) => {
+  ExperienceOrbEmitter.addListener('collected', ({ reward }) => {
     experience += reward;
   });
   let renderCount = 0;
@@ -106,4 +106,21 @@ const Player = () => {
 }
 
 export default Player;
+
+export const PlayerLevels = [
+  { level: 1, experience: 0 },
+  { level: 2, experience: 10 },
+  { level: 3, experience: 25 },
+  { level: 4, experience: 50 },
+  { level: 5, experience: 100 },
+  { level: 6, experience: 250 },
+];
+
+
+
+
+
+
+
+
 

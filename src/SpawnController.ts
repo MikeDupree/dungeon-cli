@@ -5,7 +5,7 @@ import { PlayerEmitter } from "./Player";
 import { Pos } from "./types";
 
 const enemyLimit = 4;
-const totalEnemies = 0;
+let totalEnemies = 0;
 let playerPos = config.playerStartPos;
 
 export const SpawnEmitter = new EventEmitter();
@@ -18,5 +18,9 @@ export const createEnemySpawn = () => {
     swarm.push(Enemy(playerPos));
   }
 
+  totalEnemies += swarm.length;
   return swarm;
 }
+
+// TODO could there be a race condition here ?
+SpawnEmitter.on('death', () => totalEnemies -= 1);

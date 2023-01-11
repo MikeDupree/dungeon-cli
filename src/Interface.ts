@@ -2,11 +2,13 @@
 import config from '../config';
 import { EnemyInterface } from './Enemy';
 import { ExperienceOrbEmitter } from './ExperienceOrbs';
-import { PlayerInterface } from './Player';
+import { PlayerInterface, PlayerLevels } from './Player';
 
 // CONFIG
 const { display } = config;
 const { columns, rows } = process.stdout;
+
+const playerLevels = PlayerLevels;
 
 // interface Building
 export const isInterface = (row: number) => {
@@ -18,8 +20,15 @@ ExperienceOrbEmitter.addListener('collected', ({ reward }) => {
   experience += reward;
 });
 
+const getLevelProgessBar = () => {
+  const currentLevel = playerLevels.filter(level => level.experience >= currentLevel);
+  return JSON.stringify(currentLevel);
+  const percentage = experience / currentLevel.experience * 100;
+  return Math.ceil(percentage);
+}
 const experienceBar = () => {
-  return `XP: ${experience} \x1b[92m#\x1b[0m`;
+  const currentLevel = playerLevels.filter(level => level.experience > currentLevel)?.pop();
+  return `Level: ${currentLevel} XP: ${experience} ${getLevelProgessBar()} \x1b[92m#\x1b[0m`;
 }
 
 export const getInterfaceCharacter = (col: number, { enemies, player }: { enemies: EnemyInterface[], player: PlayerInterface }) => {
