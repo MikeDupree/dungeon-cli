@@ -16,7 +16,7 @@ export const DisplayEmitter = new EventEmitter();
 const flush = () => {
   if(config.debug) return;
   // Clear buffer history before rerender
-  stdout.write("\u001b[3J\u001b[2J\u001b[1J");
+  stdout.write("\u001b[3J\u001b[2J\u001b[1J\033[2J");
   // Faster buffer clear. (vs using console.clear)
   stdout.cursorTo(0);
   stdout.clearScreenDown();

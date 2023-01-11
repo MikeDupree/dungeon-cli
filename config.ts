@@ -21,7 +21,7 @@ const config = {
     }
   },
   display: {
-    refreshRate: 50,
+    refreshRate: 100,
     padding: {
       top: 0,
       bottom: 2,

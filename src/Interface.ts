@@ -21,14 +21,21 @@ ExperienceOrbEmitter.addListener('collected', ({ reward }) => {
 });
 
 const getLevelProgessBar = () => {
-  const currentLevel = playerLevels.filter(level => level.experience >= currentLevel);
-  return JSON.stringify(currentLevel);
-  const percentage = experience / currentLevel.experience * 100;
-  return Math.ceil(percentage);
+  const currentLevel = playerLevels.filter(level => experience >= level.levelAtExperience && experience < level.experience).pop();
+  if (!currentLevel) return "?"
+  const percentage = experience - currentLevel.levelAtExperience / currentLevel.experience * 100 / 5;
+  let progressBar = new Array<string>(20);
+  progressBar.fill(' ');
+  for (let i = 0; i < percentage; i++) {
+   progressBar[i] = '#'; 
+  }
+  return `[\x1b[92m${progressBar.join('')}\x1b[0m]`;
 }
+
 const experienceBar = () => {
-  const currentLevel = playerLevels.filter(level => level.experience > currentLevel)?.pop();
-  return `Level: ${currentLevel} XP: ${experience} ${getLevelProgessBar()} \x1b[92m#\x1b[0m`;
+  const currentLevel = playerLevels.filter(level => experience >= level.levelAtExperience && experience < level.experience).pop();
+  if (!currentLevel) return "?"
+  return `Level: ${currentLevel.level} XP: ${experience - currentLevel.levelAtExperience} / ${currentLevel.experience} ${getLevelProgessBar()} \x1b[92m#\x1b[0m`;
 }
 
 export const getInterfaceCharacter = (col: number, { enemies, player }: { enemies: EnemyInterface[], player: PlayerInterface }) => {

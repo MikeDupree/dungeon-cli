@@ -18,10 +18,8 @@ export interface PlayerInterface extends CharacterInterface {
 
 // Player
 const Player = () => {
+  let health = 10;
   let experience = 0;
-  ExperienceOrbEmitter.addListener('collected', ({ reward }) => {
-    experience += reward;
-  });
   let renderCount = 0;
   let marker = config.custom.symbols.player;
   let speed = 1;
@@ -29,9 +27,15 @@ const Player = () => {
     x: Math.trunc(rows / 2),
     y: Math.trunc(columns / 2)
   }
+  let vulnerable = true;
 
   //Base attack
-  let baseAttackPos = { x: pos.x, y: pos.y };
+  let attackPos = [
+    { x: pos.x, y: pos.y, direction: 'y', movement: -1 },
+    { x: pos.x, y: pos.y, direction: 'y', movement: 1 },
+    { x: pos.x, y: pos.y, direction: 'x', movement: -1 },
+    { x: pos.x, y: pos.y, direction: 'x', movement: 1 },
+  ];
   let baseAttackAge = 0;
 
   const debug = (title: string, data: any = '') => {
@@ -39,7 +43,6 @@ const Player = () => {
   }
 
   const render = (mode?: "attack") => {
-    debug('player render', pos);
     if (mode === "attack") return renderAttack();
     renderCount += 1;
     return `\x1b[92m${marker}\x1b[0m`;
@@ -50,7 +53,6 @@ const Player = () => {
   }
 
   const checkInput = (key: string) => {
-    debug('player move check');
     switch (key) {
       case up:
         if (isBorderWall(pos.x - 1, pos.y)) return;
@@ -69,7 +71,6 @@ const Player = () => {
         pos.y += speed;
         break;
     }
-    debug('player moved', pos);
     PlayerEmitter.emit("move", pos);
   }
 
@@ -78,22 +79,43 @@ const Player = () => {
   }
 
   const attackCollides = ({ x, y }: Pos) => {
-    return baseAttackPos.x === x && baseAttackPos.y === y;
+    for (const pos of attackPos) {
+      if (pos.x === x && pos.y === y) {
+        return true;
+      }
+    }
+    return false;
   }
 
   const baseAttack = () => {
-    if (renderCount % 5 !== 0) return;
+    if (renderCount % 2 !== 0) return;
     baseAttackAge += 1;
-    if (baseAttackAge <= 5) {
-      baseAttackPos.y -= 1;
+    if (baseAttackAge <= 10) {
+      for (const ap of attackPos) {
+        ap[ap.direction] += ap.movement; 
+      }
     } else {
-      baseAttackPos.x = pos.x;
-      baseAttackPos.y = pos.y;
+      for (const ap of attackPos) {
+        ap.x = pos.x;
+        ap.y = pos.y;
+      }
       baseAttackAge = 0;
     }
   }
 
+  const takeDamage = (dmg: number) => {
+    if (vulnerable) {
+      health -= dmg;
+    }
+    vulnerable = false;
+    setTimeout(() => vulnerable = true, 500);
+  }
+
   DisplayEmitter.addListener('render', baseAttack);
+  ExperienceOrbEmitter.addListener('collected', ({ reward }) => {
+    experience += reward;
+  });
+  PlayerEmitter.on('takeDamage', (dmg) => takeDamage(dmg));
 
   return {
     experience,
@@ -108,12 +130,12 @@ const Player = () => {
 export default Player;
 
 export const PlayerLevels = [
-  { level: 1, experience: 0 },
-  { level: 2, experience: 10 },
-  { level: 3, experience: 25 },
-  { level: 4, experience: 50 },
-  { level: 5, experience: 100 },
-  { level: 6, experience: 250 },
+  { level: 1, levelAtExperience: 0, experience: 10 },
+  { level: 2, levelAtExperience: 10, experience: 25 },
+  { level: 3, levelAtExperience: 25, experience: 50 },
+  { level: 4, levelAtExperience: 50, experience: 100 },
+  { level: 5, levelAtExperience: 100, experience: 250 },
+  { level: 6, levelAtExperience: 250, experience: 500 },
 ];
 
 

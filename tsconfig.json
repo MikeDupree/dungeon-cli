@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noImplicitUseStrict": true,
     "outDir": "./build",
     "baseUrl": ".",
     "paths": {
