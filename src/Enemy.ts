@@ -61,6 +61,7 @@ const Enemy = (currentPlayerPos: Pos) => {
   let speed = 5;
   let health = 2;
   let rewardXP = 1;
+  let attackDamage = 1;
 
   const render = () => {
     return marker;
@@ -70,6 +71,11 @@ const Enemy = (currentPlayerPos: Pos) => {
     renderCount++;
     if (renderCount % speed !== 0) return;
 
+    if(playerPos.x === pos.x && playerPos.y === pos.y) {
+      // damage player.
+      PlayerEmitter.emit('takeDamage', attackDamage);
+      return;
+    }
     if (playerPos.x < pos.x) {
       pos.x -= 1;
     }

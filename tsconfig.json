@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
-    "outDir": "./build"
+    "noImplicitUseStrict": true,
+    "outDir": "./build",
+    "baseUrl": ".",
+    "paths": {
+      "@config": ["config.ts"]
+    }
   },
   "include": ["*.ts", "src/**/*.ts"]
 }
